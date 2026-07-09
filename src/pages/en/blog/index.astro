@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '@layouts/BaseLayout.astro';
 import PostCard from '@components/posts/PostCard.astro';
 import SearchBoard from '@components/search/SearchBoard.astro';
-import { useTranslations, type Lang } from '@utils/i18n';
+import { useTranslations, localePath, type Lang } from '@utils/i18n';
 
 const lang: Lang = 'en';
 const t = useTranslations(lang);
@@ -54,7 +54,7 @@ const sortedPosts = posts.sort(
           date={post.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
           tags={post.data.tags}
           category={post.data.category}
-          url={`/${lang}/blog/${post.id.replace(`${lang}/`, '').replace(/\.(md|mdx)$/, '')}`}
+          url={localePath(lang, `/blog/${post.id.replace(`${lang}/`, '').replace(/\.(md|mdx)$/, '')}`)}
           index={i}
           readMoreLabel={t('post.readMore')}
         />

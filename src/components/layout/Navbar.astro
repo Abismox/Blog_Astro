@@ -1,5 +1,5 @@
 ---
-import { useTranslations, type Lang } from '@utils/i18n';
+import { useTranslations, localePath, type Lang } from '@utils/i18n';
 
 interface Props {
   lang?: Lang;
@@ -9,9 +9,9 @@ const { lang = 'es' } = Astro.props;
 const t = useTranslations(lang);
 
 const navLinks = [
-  { href: `/${lang}`, key: 'nav.home' as const },
-  { href: `/${lang}/blog`, key: 'nav.blog' as const },
-  { href: `/${lang}/portfolio`, key: 'nav.portfolio' as const },
+  { href: localePath(lang), key: 'nav.home' as const },
+  { href: localePath(lang, '/blog'), key: 'nav.blog' as const },
+  { href: localePath(lang, '/portfolio'), key: 'nav.portfolio' as const },
 ];
 
 const otherLang: Lang = lang === 'es' ? 'en' : 'es';
@@ -31,7 +31,7 @@ const currentPath = Astro.url.pathname;
            transition-all duration-300"
   >
     <!-- Logo -->
-    <a href="/" class="navbar-logo flex items-center gap-2 group" data-cursor-magnetic>
+    <a href={localePath(lang)} class="navbar-logo flex items-center gap-2 group" data-cursor-magnetic>
       <div class="relative w-8 h-8 flex items-center justify-center">
         <div class="absolute inset-0 bg-neon-cyan/20 rounded-lg blur-sm group-hover:bg-neon-cyan/30 transition-colors"></div>
         <span class="relative font-display text-lg font-bold gradient-text">&lt;/&gt;</span>
@@ -148,6 +148,14 @@ const currentPath = Astro.url.pathname;
   </div>
 </header>
 
+<script is:inline define:vars={{ baseUrl: import.meta.env.BASE_URL }}>
+  // Expose the project's base path (from astro.config.mjs) to the inline
+  // script below, which can't read import.meta.env because it's marked
+  // is:inline. Used by the language switcher to swap /es ↔ /en correctly
+  // when the site is hosted under a sub-path (e.g. GitHub Pages project sites).
+  window.__BASE_URL = baseUrl;
+</script>
+
 <script is:inline>
   // Prevent duplicate initialization on View Transitions
   if (!window.__navbarInit) {
@@ -194,11 +202,14 @@ const currentPath = Astro.url.pathname;
       // Language toggle
       langToggle?.addEventListener('click', () => {
         const currentPath = window.location.pathname;
-        const isEn = currentPath.startsWith('/en');
+        const base = (window.__BASE_URL || '/').replace(/\/$/, '');
+        const prefix = base === '' ? '' : base;
+        const isEn = currentPath === `${prefix}/en` || currentPath.startsWith(`${prefix}/en/`);
         if (isEn) {
-          window.location.pathname = currentPath.replace('/en', '') || '/';
+          const stripped = currentPath.replace(`${prefix}/en`, '') || '/';
+          window.location.pathname = prefix === '' ? stripped : (prefix + stripped);
         } else {
-          window.location.pathname = '/en' + currentPath;
+          window.location.pathname = `${prefix}/en` + currentPath;
         }
       });
 

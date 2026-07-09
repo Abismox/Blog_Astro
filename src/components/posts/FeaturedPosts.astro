@@ -1,6 +1,6 @@
 ---
 import PostCard from './PostCard.astro';
-import { useTranslations, type Lang } from '@utils/i18n';
+import { useTranslations, localePath, type Lang } from '@utils/i18n';
 import { getPostsByLang } from '@utils/posts';
 
 interface Props {
@@ -25,7 +25,7 @@ const formatted = displayPosts.map((post) => ({
   ),
   tags: post.data.tags,
   category: post.data.category,
-  url: `/${lang}/blog/${post.id.replace(`${lang}/`, '').replace(/\.(md|mdx)$/, '')}`,
+  url: localePath(lang, `/blog/${post.id.replace(`${lang}/`, '').replace(/\.(md|mdx)$/, '')}`),
   readMoreLabel: t('post.readMore'),
 }));
 ---
@@ -64,7 +64,7 @@ const formatted = displayPosts.map((post) => ({
 
     <div class="featured-footer flex justify-center">
       <a
-        href={`/${lang}/blog`}
+        href={localePath(lang, '/blog')}
         class="group inline-flex items-center gap-2 px-6 py-3
                border border-white/10 rounded-xl text-sm font-medium text-gray-400
                hover:border-neon-cyan/30 hover:text-neon-cyan hover:bg-neon-cyan/5

@@ -1,5 +1,5 @@
 ---
-import { useTranslations, type Lang } from '@utils/i18n';
+import { useTranslations, localePath, type Lang } from '@utils/i18n';
 
 interface Props {
   lang?: Lang;
@@ -57,7 +57,7 @@ const stats = [
     <!-- CTA Buttons -->
     <div id="hero-cta" class="hero-reveal flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
       <a
-        href={`/${lang}/blog`}
+        href={localePath(lang, '/blog')}
         class="hero-btn group relative inline-flex items-center gap-2 px-8 py-4 font-semibold text-sm tracking-wide rounded-xl
                bg-gradient-to-r from-brand-500 to-brand-600
                text-white shadow-[0_0_30px_rgba(99,102,241,0.3)]
@@ -72,7 +72,7 @@ const stats = [
       </a>
 
       <a
-        href={`/${lang}/portfolio`}
+        href={localePath(lang, '/portfolio')}
         class="hero-btn group relative inline-flex items-center gap-2 px-8 py-4 font-semibold text-sm tracking-wide rounded-xl
                border border-white/20 text-white
                hover:border-neon-cyan/50 hover:bg-neon-cyan/5 hover:text-neon-cyan

@@ -1,3 +1,5 @@
+import { assetPath } from './i18n';
+
 export type GameColor = 'cyan' | 'purple' | 'pink';
 export type GameAspectRatio = '16/9' | '4/3';
 
@@ -21,7 +23,7 @@ export const games: Game[] = [
   {
     slug: 'demo',
     title: 'DEMO',
-    gameUrl: '/games/demo.html',
+    gameUrl: assetPath('/games/demo.html'),
     description: 'Partículas interactivas con Canvas',
     tags: ['canvas', 'arcade'],
     color: 'cyan',
