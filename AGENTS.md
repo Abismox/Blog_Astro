@@ -83,3 +83,27 @@ src/
 - GSAP 3.15+ (ScrollTrigger)
 - MDX for content
 - Fonts: Space Grotesk (display), Inter (body), JetBrains Mono (code)
+
+## Deployment (GitHub Pages — Project Site)
+
+- **Repo:** `https://github.com/Abismox/Blog_Astro.git` (Project site, subcarpeta)
+- **Live URL:** `https://Abismox.github.io/Blog_Astro/`
+- **`site` en astro.config.mjs:** `https://Abismox.github.io`
+- **`base` en astro.config.mjs:** `/Blog_Astro` (obligatorio — sin esto las rutas i18n, assets y View Transitions rompen)
+- **Workflow:** `.github/workflows/deploy.yml` usa `actions/deploy-pages@v4`
+
+### Setup obligatorio en GitHub (una sola vez)
+1. Repo → **Settings → Pages → Build and deployment → Source** → seleccionar **"GitHub Actions"** (no "Deploy from a branch"). Esto habilita el workflow que ya está committeado.
+2. Verificar que en **Settings → Actions → General → Workflow permissions** esté "Read and write permissions" (lo necesita `actions/deploy-pages`).
+
+### Flujo de trabajo
+```bash
+git add .
+git commit -m "..."
+git push origin main   # dispara el workflow, deploy automático en ~1-2 min
+```
+
+### Verificación post-deploy
+- Tab **Actions** del repo: el run debe quedar en verde.
+- `https://Abismox.github.io/Blog_Astro/` debe redirigir a `/Blog_Astro/es/`.
+- Inspeccionar la red: los assets deben servirse desde `/Blog_Astro/_astro/...` (no `/`).
