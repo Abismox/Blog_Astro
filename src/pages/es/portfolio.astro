@@ -1,0 +1,37 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import ArcadeLobby from '@components/portfolio/ArcadeLobby.astro';
+import { useTranslations, type Lang } from '@utils/i18n';
+
+const lang: Lang = 'es';
+const t = useTranslations(lang);
+---
+
+<BaseLayout
+  title={t('portfolio.pageMetaTitle')}
+  description={t('portfolio.pageMetaDescription')}
+  lang={lang}
+>
+  <section class="relative py-20 px-6 text-center overflow-hidden">
+    <div class="absolute inset-0 pointer-events-none">
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-neon-purple/10 rounded-full blur-[120px]"></div>
+    </div>
+
+    <div class="relative z-10 max-w-3xl mx-auto">
+      <div class="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full border border-neon-purple/30 bg-neon-purple/5">
+        <span class="w-2 h-2 bg-neon-purple rounded-full animate-pulse"></span>
+        <span class="text-sm font-mono text-neon-purple tracking-wider">PORTFOLIO</span>
+      </div>
+
+      <h1 class="text-4xl sm:text-5xl md:text-6xl font-display font-bold text-white mb-6">
+        {t('portfolio.pageTitle')} <span class="gradient-text">{t('portfolio.pageTitleHighlight')}</span>
+      </h1>
+
+      <p class="text-lg text-gray-400 max-w-xl mx-auto">
+        {t('portfolio.pageSubtitle')}
+      </p>
+    </div>
+  </section>
+
+  <ArcadeLobby lang={lang} />
+</BaseLayout>

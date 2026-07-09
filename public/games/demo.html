@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo Game</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #050510;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+    canvas {
+      border: 1px solid rgba(0, 245, 255, 0.2);
+      border-radius: 8px;
+    }
+    #ui {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-family: 'Courier New', monospace;
+      color: #00f5ff;
+      font-size: 14px;
+      text-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
+    }
+    #instructions {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Courier New', monospace;
+      color: #666;
+      font-size: 12px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div id="ui">
+    <div>SCORE: <span id="score">0</span></div>
+    <div>CLICK TO PLAY</div>
+  </div>
+  <canvas id="game"></canvas>
+  <div id="instructions">Move mouse to control • Click to shoot</div>
+
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const scoreEl = document.getElementById('score');
+
+    let width = canvas.width = Math.min(window.innerWidth - 40, 800);
+    let height = canvas.height = Math.min(window.innerHeight - 40, 600);
+    let score = 0;
+    let mouseX = width / 2;
+    let mouseY = height / 2;
+
+    const particles = [];
+    const stars = Array.from({ length: 100 }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      speed: Math.random() * 2 + 0.5,
+      size: Math.random() * 2
+    }));
+
+    class Particle {
+      constructor(x, y, color) {
+        this.x = x;
+        this.y = y;
+        this.vx = (Math.random() - 0.5) * 8;
+        this.vy = (Math.random() - 0.5) * 8;
+        this.life = 1;
+        this.decay = Math.random() * 0.02 + 0.01;
+        this.color = color;
+        this.size = Math.random() * 4 + 2;
+      }
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.life -= this.decay;
+        this.vx *= 0.98;
+        this.vy *= 0.98;
+      }
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = this.life;
+        ctx.fillStyle = this.color;
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size * this.life, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    const colors = ['#00f5ff', '#bf00ff', '#ff00ff', '#6366f1', '#10b981'];
+
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mouseX = e.clientX - rect.left;
+      mouseY = e.clientY - rect.top;
+    });
+
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      for (let i = 0; i < 20; i++) {
+        particles.push(new Particle(x, y, colors[Math.floor(Math.random() * colors.length)]));
+      }
+      score += 10;
+      scoreEl.textContent = score;
+    });
+
+    function animate() {
+      ctx.fillStyle = 'rgba(5, 5, 16, 0.2)';
+      ctx.fillRect(0, 0, width, height);
+
+      // Stars
+      stars.forEach(star => {
+        star.y += star.speed;
+        if (star.y > height) { star.y = 0; star.x = Math.random() * width; }
+        ctx.fillStyle = `rgba(255, 255, 255, ${star.speed / 3})`;
+        ctx.fillRect(star.x, star.y, star.size, star.size);
+      });
+
+      // Crosshair
+      ctx.strokeStyle = 'rgba(0, 245, 255, 0.5)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(mouseX, mouseY, 20, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(mouseX - 10, mouseY);
+      ctx.lineTo(mouseX + 10, mouseY);
+      ctx.moveTo(mouseX, mouseY - 10);
+      ctx.lineTo(mouseX, mouseY + 10);
+      ctx.stroke();
+
+      // Particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        particles[i].update();
+        particles[i].draw();
+        if (particles[i].life <= 0) particles.splice(i, 1);
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = Math.min(window.innerWidth - 40, 800);
+      height = canvas.height = Math.min(window.innerHeight - 40, 600);
+    });
+  </script>
+</body>
+</html>

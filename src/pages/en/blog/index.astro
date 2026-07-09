@@ -1,0 +1,64 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import PostCard from '@components/posts/PostCard.astro';
+import SearchBoard from '@components/search/SearchBoard.astro';
+import { useTranslations, type Lang } from '@utils/i18n';
+
+const lang: Lang = 'en';
+const t = useTranslations(lang);
+
+const posts = await getCollection('posts', ({ id, data }) => {
+  return id.startsWith(`${lang}/`) && data.language === lang && !data.draft;
+});
+
+const sortedPosts = posts.sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+---
+
+<BaseLayout
+  title={`${t('blog.pageTitle')} ${t('blog.pageTitleHighlight')} | DevBlog`}
+  description={t('blog.pageSubtitle')}
+  lang={lang}
+>
+  <section class="relative py-20 px-6 text-center overflow-hidden">
+    <div class="absolute inset-0 pointer-events-none">
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-neon-cyan/10 rounded-full blur-[120px]"></div>
+    </div>
+
+    <div class="relative z-10 max-w-3xl mx-auto">
+      <div class="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full border border-neon-cyan/30 bg-neon-cyan/5">
+        <span class="w-2 h-2 bg-neon-cyan rounded-full animate-pulse"></span>
+        <span class="text-sm font-mono text-neon-cyan tracking-wider">BLOG</span>
+      </div>
+
+      <h1 class="text-4xl sm:text-5xl md:text-6xl font-display font-bold text-white mb-6">
+        {t('blog.pageTitle')} <span class="gradient-text">{t('blog.pageTitleHighlight')}</span>
+      </h1>
+
+      <p class="text-lg text-gray-400 max-w-xl mx-auto">
+        {t('blog.pageSubtitle')}
+      </p>
+    </div>
+  </section>
+
+  <SearchBoard lang={lang} />
+
+  <section class="max-w-6xl mx-auto px-6 py-12">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {sortedPosts.map((post, i) => (
+        <PostCard
+          title={post.data.title}
+          description={post.data.description}
+          date={post.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+          tags={post.data.tags}
+          category={post.data.category}
+          url={`/${lang}/blog/${post.id.replace(`${lang}/`, '').replace(/\.(md|mdx)$/, '')}`}
+          index={i}
+          readMoreLabel={t('post.readMore')}
+        />
+      ))}
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,246 @@
+---
+interface Props {
+  /** Ruta al archivo HTML del juego (ej: '/games/bombermax.html') */
+  gameUrl: string;
+  /** Título del juego */
+  title: string;
+  /** Relación de aspecto: '16/9' o '4/3' */
+  aspectRatio?: '16/9' | '4/3';
+  /** Descripción corta del juego */
+  description?: string;
+}
+
+const {
+  gameUrl,
+  title,
+  aspectRatio = '16/9',
+  description = '',
+} = Astro.props;
+
+const aspectClass = aspectRatio === '4/3' ? 'aspect-[4/3]' : 'aspect-video';
+---
+
+<div class="arcade-machine relative group">
+  <!-- Outer glow -->
+  <div class="absolute -inset-2 bg-gradient-to-r from-neon-cyan/20 via-brand-500/10 to-neon-purple/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+
+  <!-- Cabinet body -->
+  <div class="relative bg-[#0a0e1a] rounded-2xl border border-white/10 overflow-hidden
+              shadow-[0_0_60px_rgba(0,245,255,0.05)]
+              group-hover:shadow-[0_0_80px_rgba(0,245,255,0.1)]
+              transition-shadow duration-500">
+
+    <!-- Top marquee -->
+    <div class="relative px-6 py-4 bg-gradient-to-r from-brand-900/80 via-[#1a1040] to-brand-900/80 border-b border-white/10">
+      <!-- LED dots -->
+      <div class="absolute top-0 left-0 right-0 flex justify-between px-4 py-1">
+        <div class="flex gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-neon-cyan/60 animate-pulse"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-neon-purple/60 animate-pulse" style="animation-delay: 0.3s"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-neon-pink/60 animate-pulse" style="animation-delay: 0.6s"></span>
+        </div>
+        <div class="flex gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-neon-pink/60 animate-pulse" style="animation-delay: 0.9s"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-neon-purple/60 animate-pulse" style="animation-delay: 1.2s"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-neon-cyan/60 animate-pulse" style="animation-delay: 1.5s"></span>
+        </div>
+      </div>
+
+      <!-- Title -->
+      <div class="text-center pt-2">
+        <h3 class="font-display text-lg sm:text-xl font-bold tracking-wider">
+          <span class="gradient-text">{title}</span>
+        </h3>
+        {description && (
+          <p class="text-xs font-mono text-gray-500 mt-1">{description}</p>
+        )}
+      </div>
+    </div>
+
+    <!-- Screen bezel -->
+    <div class="p-3 sm:p-4">
+      <div class="relative bg-black rounded-xl border-2 border-white/5 overflow-hidden
+                  shadow-inner shadow-black/50">
+
+        <!-- Screen content -->
+        <div id={`screen-${title.replace(/\s/g, '-')}`} class={`relative ${aspectClass} bg-[#050510]`}>
+          <!-- Loading overlay -->
+          <div id={`loading-${title.replace(/\s/g, '-')}`}
+               class="loading-overlay absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#050510]">
+            <!-- CRT scanlines -->
+            <div class="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.15)_2px,rgba(0,0,0,0.15)_4px)] pointer-events-none"></div>
+
+            <!-- Loading content -->
+            <div class="loading-content text-center">
+              <div class="inline-flex items-center gap-3 px-6 py-3 rounded-lg border border-neon-cyan/30 bg-neon-cyan/5 mb-4">
+                <svg class="w-5 h-5 text-neon-cyan animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span class="font-mono text-sm text-neon-cyan tracking-wider">LOADING...</span>
+              </div>
+              <p class="text-xs font-mono text-gray-600 tracking-[0.3em]">INSERT COIN</p>
+            </div>
+          </div>
+
+          <!-- Iframe -->
+          <iframe
+            id={`iframe-${title.replace(/\s/g, '-')}`}
+            src=""
+            data-src={gameUrl}
+            title={title}
+            class="absolute inset-0 w-full h-full border-0"
+            sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            loading="lazy"
+          ></iframe>
+        </div>
+      </div>
+    </div>
+
+    <!-- Control panel -->
+    <div class="px-4 pb-4">
+      <div class="flex items-center justify-between gap-3">
+        <!-- Status LED -->
+        <div class="flex items-center gap-2">
+          <span id={`status-led-${title.replace(/\s/g, '-')}`}
+                class="w-2 h-2 rounded-full bg-gray-600 transition-colors duration-300"></span>
+          <span class="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Ready</span>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex items-center gap-2">
+          <!-- Play/Load button -->
+          <button
+            id={`play-btn-${title.replace(/\s/g, '-')}`}
+            class="play-btn flex items-center gap-2 px-4 py-2
+                   bg-gradient-to-r from-brand-600 to-brand-500
+                   hover:from-brand-500 hover:to-brand-400
+                   text-white text-xs font-mono font-bold tracking-wider uppercase
+                   rounded-lg
+                   shadow-[0_0_20px_rgba(99,102,241,0.3)]
+                   hover:shadow-[0_0_30px_rgba(99,102,241,0.5)]
+                   transition-all duration-300"
+            data-game={gameUrl}
+            data-title={title}
+          >
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+            <span>PLAY</span>
+          </button>
+
+          <!-- Fullscreen button -->
+          <button
+            id={`fullscreen-btn-${title.replace(/\s/g, '-')}`}
+            class="fullscreen-btn flex items-center justify-center w-9 h-9
+                   border border-white/10 rounded-lg
+                   text-gray-400 hover:text-neon-cyan hover:border-neon-cyan/30 hover:bg-neon-cyan/5
+                   transition-all duration-300"
+            title="Pantalla completa"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function initArcadeMachines() {
+    const playButtons = document.querySelectorAll('.play-btn');
+    const fullscreenButtons = document.querySelectorAll('.fullscreen-btn');
+
+    // Play button handler
+    playButtons.forEach((btn) => {
+      const newBtn = btn.cloneNode(true);
+      btn.parentNode?.replaceChild(newBtn, btn);
+
+      newBtn.addEventListener('click', () => {
+        const gameUrl = newBtn.getAttribute('data-game');
+        const title = newBtn.getAttribute('data-title') || '';
+        const screenId = `screen-${title.replace(/\s/g, '-')}`;
+        const iframeId = `iframe-${title.replace(/\s/g, '-')}`;
+        const loadingId = `loading-${title.replace(/\s/g, '-')}`;
+        const ledId = `status-led-${title.replace(/\s/g, '-')}`;
+
+        const iframe = document.getElementById(iframeId) as HTMLIFrameElement;
+        const loading = document.getElementById(loadingId);
+        const led = document.getElementById(ledId);
+
+        if (!iframe || !gameUrl) return;
+
+        // Update LED
+        if (led) {
+          led.classList.remove('bg-gray-600');
+          led.classList.add('bg-yellow-500', 'animate-pulse');
+        }
+
+        // Load game
+        iframe.src = gameUrl;
+
+        // Hide loading when iframe loads
+        iframe.onload = () => {
+          if (loading) {
+            loading.style.opacity = '0';
+            loading.style.pointerEvents = 'none';
+            setTimeout(() => {
+              loading.style.display = 'none';
+            }, 300);
+          }
+          if (led) {
+            led.classList.remove('bg-yellow-500', 'animate-pulse');
+            led.classList.add('bg-green-500');
+          }
+        };
+      });
+    });
+
+    // Fullscreen button handler
+    fullscreenButtons.forEach((btn) => {
+      const newBtn = btn.cloneNode(true);
+      btn.parentNode?.replaceChild(newBtn, btn);
+
+      newBtn.addEventListener('click', () => {
+        // Find the closest arcade machine container
+        const machine = newBtn.closest('.arcade-machine');
+        const screen = machine?.querySelector('[id^="screen-"]');
+
+        if (screen) {
+          if (screen.requestFullscreen) {
+            screen.requestFullscreen();
+          } else if ((screen as any).webkitRequestFullscreen) {
+            (screen as any).webkitRequestFullscreen();
+          } else if ((screen as any).msRequestFullscreen) {
+            (screen as any).msRequestFullscreen();
+          }
+        }
+      });
+    });
+  }
+
+  // Initial load
+  document.addEventListener('DOMContentLoaded', initArcadeMachines);
+
+  // View Transitions
+  document.addEventListener('astro:page-load', initArcadeMachines);
+</script>
+
+<style>
+  /* Loading overlay transition */
+  .loading-overlay {
+    transition: opacity 0.3s ease-out;
+  }
+
+  /* Fullscreen styles */
+  :fullscreen {
+    background: #050510;
+  }
+
+  :-webkit-full-screen {
+    background: #050510;
+  }
+</style>

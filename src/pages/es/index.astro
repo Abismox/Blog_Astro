@@ -1,0 +1,16 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Hero from '@components/landing/Hero.astro';
+import FeaturedPosts from '@components/posts/FeaturedPosts.astro';
+
+const lang = 'es';
+---
+
+<BaseLayout
+  title="DevBlog | Tecnología, Videojuegos y Desarrollo"
+  description="Blog personal sobre desarrollo web moderno, tecnología y videojuegos indie."
+  lang={lang}
+>
+  <Hero lang={lang} />
+  <FeaturedPosts lang={lang} />
+</BaseLayout>

@@ -1,0 +1,114 @@
+---
+import { useTranslations, type Lang } from '@utils/i18n';
+
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = 'es' } = Astro.props;
+const t = useTranslations(lang);
+
+/*
+  =============================================
+  GISCUS CONFIGURATION - Replace with your data
+  =============================================
+  
+  1. Go to https://giscus.app
+  2. Enter your repository and category
+  3. Copy the values below
+  
+  data-repo: "TU_USUARIO/TU_REPO"
+  data-repo-id: "R_XXXXXXX"
+  data-category: "Announcements"
+  data-category-id: "DIC_XXXXXXX"
+*/
+---
+
+<div id="giscus-container" class="mt-16 pt-8 border-t border-white/10">
+  <!-- Header -->
+  <div class="flex items-center gap-3 mb-6">
+    <div class="w-8 h-[2px] bg-neon-cyan"></div>
+    <span class="text-xs font-mono text-neon-cyan tracking-[0.3em] uppercase">
+      {t('comments.title')}
+    </span>
+  </div>
+
+  <!-- Giscus iframe target -->
+  <div id="giscus-frame" class="giscus rounded-xl overflow-hidden"></div>
+
+  <!--
+    =============================================
+    TODO: Configure Giscus with your credentials
+    =============================================
+    1. Visita https://giscus.app
+    2. Conecta tu repo de GitHub Discussions
+    3. Reemplaza los valores en el <script> abajo:
+       - data-repo: "tu-usuario/tu-repo"
+       - data-repo-id: "R_xxxxxxx"
+       - data-category: "Announcements"
+       - data-category-id: "DIC_xxxxxxx"
+    4. Opcional: define variables de entorno públicas
+       y cámbialas por Astro.props o import.meta.env.
+    =============================================
+  -->
+</div>
+
+<script define:vars={{ lang }}>
+  function initGiscus() {
+    const container = document.getElementById('giscus-container');
+    if (!container) return;
+
+    // Remove existing iframe if present
+    const existingFrame = container.querySelector('iframe');
+    if (existingFrame) {
+      existingFrame.remove();
+    }
+
+    // Remove existing script
+    const existingScript = container.querySelector('script[data-giscus]');
+    if (existingScript) {
+      existingScript.remove();
+    }
+
+    // Create new script
+    const script = document.createElement('script');
+    script.setAttribute('data-giscus', '');
+    script.src = 'https://giscus.app/client.js';
+    script.setAttribute('crossorigin', 'anonymous');
+    script.setAttribute('async', '');
+
+    // Giscus configuration
+    script.setAttribute('data-repo', 'TU_USUARIO/TU_REPO');
+    script.setAttribute('data-repo-id', 'R_XXXXXXX');
+    script.setAttribute('data-category', 'Announcements');
+    script.setAttribute('data-category-id', 'DIC_XXXXXXX');
+    script.setAttribute('data-mapping', 'pathname');
+    script.setAttribute('data-strict', '0');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-emit-metadata', '0');
+    script.setAttribute('data-input-position', 'bottom');
+    script.setAttribute('data-theme', 'dark');
+    script.setAttribute('data-lang', lang === 'es' ? 'es' : 'en');
+    script.setAttribute('data-loading', 'lazy');
+
+    container.appendChild(script);
+  }
+
+  // Initial load
+  document.addEventListener('DOMContentLoaded', initGiscus);
+
+  // View Transitions - reload Giscus on navigation
+  document.addEventListener('astro:page-load', initGiscus);
+  document.addEventListener('astro:after-swap', initGiscus);
+</script>
+
+<style>
+  /* Giscus theme overrides for cyberpunk aesthetic */
+  :global(.giscus) {
+    width: 100%;
+  }
+
+  :global(.giscus-frame) {
+    border: none !important;
+  }
+</style>

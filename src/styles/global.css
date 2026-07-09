@@ -1,0 +1,563 @@
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/700.css';
+
+@layer base {
+  /* 3D context & will-change for animated cards */
+  .post-card,
+  .game-card,
+  .search-result-card {
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+
+  /* Split text chars */
+  .split-text .split-char {
+    display: inline-block;
+    transform-origin: 50% 100%;
+    will-change: transform, opacity;
+  }
+
+  /* Chars from gradient-text retain their bg-clip:text individually */
+  .split-text .split-char-gradient {
+    display: inline-block;
+  }
+
+  /* Custom cursor follower (desktop only) */
+  .cursor-follower {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 18px;
+    height: 18px;
+    border-radius: 9999px;
+    background: #00f5ff;
+    box-shadow: 0 0 12px rgba(0, 245, 255, 0.65), 0 0 32px rgba(0, 245, 255, 0.35);
+    pointer-events: none;
+    mix-blend-mode: difference;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    display: none;
+    will-change: transform;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .cursor-follower {
+      display: block;
+    }
+
+    /* Hide native cursor on interactive elements */
+    a,
+    button,
+    [data-cursor-magnetic],
+    [data-cursor-tilt] {
+      cursor: none;
+    }
+  }
+
+  html.light .cursor-follower {
+    background: #2563eb;
+    box-shadow: 0 0 12px rgba(37, 99, 235, 0.65), 0 0 32px rgba(37, 99, 235, 0.35);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cursor-follower {
+      display: none !important;
+    }
+
+    a,
+    button,
+    [data-cursor-magnetic],
+    [data-cursor-tilt] {
+      cursor: auto;
+    }
+  }
+}
+
+@layer components {
+  /* === 3D Card Flip === */
+  .cards-perspective {
+    perspective: 1500px;
+    perspective-origin: 50% 50%;
+  }
+
+  .card-3d {
+    transform-style: preserve-3d;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .card-3d:focus-visible {
+    outline: 2px solid #00f5ff;
+    outline-offset: 4px;
+  }
+
+  .card-face {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  .card-face-front {
+    /* posición default; backface se oculta al rotar */
+  }
+
+  .card-face-back {
+    position: absolute;
+    inset: 0;
+    transform: rotateY(180deg);
+  }
+
+  /* === Shockwave pool containers (creados via JS) === */
+  .shockwave {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9998;
+    border-radius: 50%;
+    overflow: visible;
+    will-change: transform, opacity;
+  }
+
+  /* === Particle burst === */
+  .particle {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9997;
+    will-change: transform, opacity, background-color;
+    transform: translate(0, 0);
+  }
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  }
+
+  /* Dark mode (default) */
+  html.dark body {
+    @apply antialiased text-gray-100;
+    background-color: #0b0f19;
+  }
+
+  /* Light mode */
+  html.light body {
+    @apply antialiased text-slate-900;
+    background-color: #f8fafc;
+  }
+
+  /* Scrollbar dark */
+  html.dark ::-webkit-scrollbar {
+    @apply w-2;
+  }
+  html.dark ::-webkit-scrollbar-track {
+    @apply bg-gray-900;
+  }
+  html.dark ::-webkit-scrollbar-thumb {
+    @apply bg-brand-600 rounded-full;
+  }
+
+  /* Scrollbar light */
+  html.light ::-webkit-scrollbar {
+    @apply w-2;
+  }
+  html.light ::-webkit-scrollbar-track {
+    @apply bg-gray-200;
+  }
+  html.light ::-webkit-scrollbar-thumb {
+    @apply bg-brand-400 rounded-full;
+  }
+
+  ::selection {
+    @apply bg-brand-500/30 text-white;
+  }
+}
+
+/* ========================================
+   Light Mode Overrides - High Contrast
+   ======================================== */
+html.light {
+  /* Body & text */
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+}
+
+/* Headings */
+html.light .prose-content h1,
+html.light .prose-content h2,
+html.light .prose-content h3,
+html.light .prose-content h4 {
+  color: #0f172a;
+}
+
+html.light .prose-content h2 {
+  border-color: #e2e8f0;
+}
+
+html.light .prose-content p,
+html.light .prose-content li {
+  color: #334155;
+}
+
+html.light .prose-content strong {
+  color: #0f172a;
+}
+
+html.light .prose-content em {
+  color: #475569;
+}
+
+html.light .prose-content a {
+  color: #2563eb;
+  text-decoration-color: #60a5fa;
+}
+
+html.light .prose-content a:hover {
+  color: #1d4ed8;
+}
+
+html.light .prose-content code {
+  background-color: #f1f5f9;
+  color: #7c3aed;
+  border-color: #e2e8f0;
+}
+
+html.light .prose-content pre {
+  background-color: #0f172a;
+  border-color: #e2e8f0;
+}
+
+html.light .prose-content pre code {
+  color: #e2e8f0;
+}
+
+html.light .prose-content blockquote {
+  border-color: #60a5fa;
+  background-color: #eff6ff;
+}
+
+html.light .prose-content blockquote p {
+  color: #334155;
+}
+
+html.light .prose-content td {
+  border-color: #e2e8f0;
+}
+
+html.light .prose-content tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+/* Navbar */
+html.light #navbar nav {
+  background-color: rgba(255, 255, 255, 0.85);
+  border-color: rgba(226, 232, 240, 0.6);
+  box-shadow: 0 4px 30px rgba(15, 23, 42, 0.05);
+}
+
+html.light #navbar nav:hover {
+  border-color: rgba(147, 197, 253, 0.4);
+  box-shadow: 0 4px 30px rgba(37, 99, 235, 0.05);
+}
+
+/* Cards */
+html.light .search-result-card,
+html.light .post-card-wrapper article,
+html.light .game-card {
+  background-color: #ffffff;
+  border-color: rgba(226, 232, 240, 0.6);
+}
+
+html.light .search-result-card:hover,
+html.light .post-card-wrapper article:hover,
+html.light .game-card:hover {
+  border-color: rgba(147, 197, 253, 0.4);
+  box-shadow: 0 4px 30px rgba(37, 99, 235, 0.05);
+}
+
+/* Text colors in components */
+html.light .text-gray-400,
+html.light .text-gray-500 {
+  color: #64748b;
+}
+
+html.light h1, html.light h2, html.light h3, html.light h4 {
+  color: #0f172a;
+}
+
+/* Badge & tags */
+html.light [class*="bg-white/5"] {
+  background-color: #f1f5f9;
+}
+
+html.light [class*="border-white/10"] {
+  border-color: #e2e8f0;
+}
+
+/* Gradient text stays visible */
+html.light .gradient-text {
+  background: linear-gradient(to right, #2563eb, #7c3aed, #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Hero section */
+html.light .hero-particle {
+  opacity: 0.3;
+}
+
+/* Footer */
+html.light footer {
+  border-color: #e2e8f0;
+}
+
+html.light footer p {
+  color: #64748b;
+}
+
+html.light footer a {
+  color: #94a3b8;
+}
+
+html.light footer a:hover {
+  color: #2563eb;
+}
+
+/* Arcade machine */
+html.light .arcade-machine > div {
+  background-color: #f1f5f9;
+  border-color: #e2e8f0;
+}
+
+/* Loading overlay */
+html.light .loading-overlay {
+  background-color: #f8fafc;
+}
+
+/* Section headers */
+html.light .lobby-header p,
+html.light .featured-header p {
+  color: #475569;
+}
+
+/* Prose content wrapper */
+html.light .prose-content {
+  color: #334155;
+}
+
+/* Mobile menu */
+html.light #mobile-menu {
+  background-color: rgba(255, 255, 255, 0.95);
+  border-color: rgba(226, 232, 240, 0.6);
+}
+
+html.light #mobile-menu a {
+  color: #475569;
+}
+
+html.light #mobile-menu a:hover {
+  color: #2563eb;
+  background-color: #eff6ff;
+}
+
+/* Back links */
+html.light a:hover {
+  color: #2563eb;
+}
+
+/* Game cards screen area */
+html.light [class*="bg-[#050510]"],
+html.light [class*="bg-[#0a0e1a]"],
+html.light [class*="bg-[#0d1117]"] {
+  background-color: #1e293b !important;
+}
+
+@layer components {
+  .glass {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10;
+  }
+
+  .neon-border {
+    @apply border border-neon-cyan/30 shadow-[0_0_15px_rgba(0,245,255,0.15)];
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-neon-cyan via-brand-400 to-neon-purple bg-clip-text text-transparent;
+  }
+}
+
+@view-transition {
+  navigation: traverse;
+}
+
+::view-transition-old(root) {
+  animation: fade-out 0.15s ease-in;
+}
+
+::view-transition-new(root) {
+  animation: fade-in 0.2s ease-out;
+}
+
+@keyframes fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Cyber grid background */
+.cyber-grid {
+  background-image:
+    linear-gradient(rgba(0, 245, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 245, 255, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+/* Scanline overlay */
+.scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.15) 2px,
+    rgba(0, 0, 0, 0.15) 4px
+  );
+  pointer-events: none;
+}
+
+/* Neon glow on hover */
+.hover-neon:hover {
+  box-shadow: 0 0 20px rgba(0, 245, 255, 0.3), 0 0 40px rgba(0, 245, 255, 0.1);
+}
+
+/* ========================================
+   Prose Content - Markdown Styling
+   ======================================== */
+.prose-content {
+  @apply text-gray-300 leading-relaxed;
+}
+
+.prose-content h1 {
+  @apply text-3xl sm:text-4xl font-display font-bold text-white mt-12 mb-6;
+}
+
+.prose-content h2 {
+  @apply text-2xl sm:text-3xl font-display font-bold text-white mt-10 mb-5 pb-3 border-b border-white/10;
+}
+
+.prose-content h3 {
+  @apply text-xl sm:text-2xl font-display font-semibold text-white mt-8 mb-4;
+}
+
+.prose-content h4 {
+  @apply text-lg font-display font-semibold text-white mt-6 mb-3;
+}
+
+.prose-content p {
+  @apply mb-6 text-base sm:text-lg;
+}
+
+.prose-content a {
+  @apply text-neon-cyan underline underline-offset-4 decoration-neon-cyan/30
+         hover:decoration-neon-cyan transition-colors duration-200;
+}
+
+.prose-content strong {
+  @apply text-white font-semibold;
+}
+
+.prose-content em {
+  @apply text-gray-200 italic;
+}
+
+.prose-content ul {
+  @apply list-disc list-inside mb-6 space-y-2 pl-4;
+}
+
+.prose-content ol {
+  @apply list-decimal list-inside mb-6 space-y-2 pl-4;
+}
+
+.prose-content li {
+  @apply text-gray-300;
+}
+
+.prose-content li::marker {
+  @apply text-neon-cyan/60;
+}
+
+.prose-content blockquote {
+  @apply relative pl-6 py-4 my-8
+         border-l-2 border-neon-cyan/40
+         bg-neon-cyan/5 rounded-r-xl;
+}
+
+.prose-content blockquote p {
+  @apply text-gray-200 italic mb-0;
+}
+
+.prose-content code {
+  @apply font-mono text-sm px-2 py-0.5
+         bg-white/10 text-neon-cyan
+         rounded-md border border-white/5;
+}
+
+.prose-content pre {
+  @apply relative my-8 p-6
+         bg-[#0d1117] rounded-xl
+         border border-white/10
+         overflow-x-auto;
+}
+
+.prose-content pre code {
+  @apply bg-transparent p-0 text-gray-300 border-0;
+}
+
+.prose-content hr {
+  @apply my-12 h-[1px] border-0
+         bg-gradient-to-r from-transparent via-white/20 to-transparent;
+}
+
+.prose-content img {
+  @apply w-full rounded-xl my-8
+         border border-white/10;
+}
+
+.prose-content table {
+  @apply w-full my-8 border-collapse;
+}
+
+.prose-content thead {
+  @apply border-b border-white/20;
+}
+
+.prose-content th {
+  @apply px-4 py-3 text-left text-sm font-mono font-bold text-white uppercase tracking-wider;
+}
+
+.prose-content td {
+  @apply px-4 py-3 text-sm border-b border-white/5;
+}
+
+.prose-content tbody tr {
+  @apply hover:bg-white/5 transition-colors;
+}

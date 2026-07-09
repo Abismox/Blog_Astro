@@ -1,0 +1,185 @@
+---
+import PostCard from './PostCard.astro';
+import { useTranslations, type Lang } from '@utils/i18n';
+import { getPostsByLang } from '@utils/posts';
+
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = 'es' } = Astro.props;
+const t = useTranslations(lang);
+
+const allPosts = await getPostsByLang(lang);
+const featuredPosts = allPosts.filter((post) => post.data.featured).slice(0, 4);
+const displayPosts = featuredPosts.length > 0
+  ? featuredPosts
+  : allPosts.slice(0, 4);
+
+const formatted = displayPosts.map((post) => ({
+  title: post.data.title,
+  description: post.data.description,
+  date: post.data.pubDate.toLocaleDateString(
+    lang === 'es' ? 'es-ES' : 'en-US',
+    { year: 'numeric', month: 'short', day: 'numeric' }
+  ),
+  tags: post.data.tags,
+  category: post.data.category,
+  url: `/${lang}/blog/${post.id.replace(`${lang}/`, '').replace(/\.(md|mdx)$/, '')}`,
+  readMoreLabel: t('post.readMore'),
+}));
+---
+
+<section class="relative py-24 px-6">
+  <div class="max-w-6xl mx-auto">
+    <div class="featured-header mb-16">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-8 h-[2px] bg-neon-cyan"></div>
+        <span class="text-xs font-mono text-neon-cyan tracking-[0.3em] uppercase">Blog</span>
+      </div>
+      <h2 class="featured-title text-3xl sm:text-4xl md:text-5xl font-display font-bold text-white mb-4">
+        {t('featured.sectionTitle')} <span class="gradient-text">{t('featured.sectionTitleHighlight')}</span>
+      </h2>
+      <p class="text-gray-400 text-lg max-w-xl">
+        {t('featured.sectionSubtitle')}
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+      {formatted.map((post, i) => (
+        <div class="post-card-wrapper" style={`--stagger-delay: ${i * 0.1}s`}>
+          <PostCard
+            title={post.title}
+            description={post.description}
+            date={post.date}
+            tags={post.tags}
+            category={post.category}
+            url={post.url}
+            index={i}
+            readMoreLabel={post.readMoreLabel}
+          />
+        </div>
+      ))}
+    </div>
+
+    <div class="featured-footer flex justify-center">
+      <a
+        href={`/${lang}/blog`}
+        class="group inline-flex items-center gap-2 px-6 py-3
+               border border-white/10 rounded-xl text-sm font-medium text-gray-400
+               hover:border-neon-cyan/30 hover:text-neon-cyan hover:bg-neon-cyan/5
+               hover:shadow-[0_0_20px_rgba(0,245,255,0.1)]
+               transition-all duration-300"
+        data-cursor-magnetic
+      >
+        <span>{t('featured.viewAll')}</span>
+        <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import {
+    splitTextIntoChars,
+    tilt3D,
+  } from '@utils/animations';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  let ctx: gsap.Context | null = null;
+
+  function initFeaturedAnimations() {
+    ctx?.revert();
+    ctx = gsap.context(() => {
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const isDesktop = window.matchMedia('(min-width: 768px)').matches;
+
+      if (reduceMotion) {
+        gsap.set(['.featured-header', '.post-card-wrapper', '.featured-footer'], {
+          clearProps: 'all',
+          autoAlpha: 1,
+        });
+        return;
+      }
+
+      // Hide elements BEFORE scrolling triggers anything (so they're ready for batch)
+      gsap.set(['.featured-header', '.post-card-wrapper', '.featured-footer'], { autoAlpha: 0 });
+      gsap.set('.post-card-wrapper', { y: 60, scale: 0.97 });
+      gsap.set('.featured-header', { y: 40 });
+      gsap.set('.featured-footer', { y: 30 });
+
+      if (isDesktop) {
+        const titleEl = document.querySelector<HTMLElement>('.featured-title');
+        if (titleEl) {
+          const titleChars = splitTextIntoChars(titleEl);
+          gsap.set(titleChars, { autoAlpha: 0, y: 60 });
+
+          ScrollTrigger.create({
+            trigger: titleEl,
+            start: 'top 85%',
+            once: true,
+            onEnter: () => {
+              gsap.to('.featured-header', { autoAlpha: 1, y: 0, duration: 0.3 });
+              gsap.to(titleChars, {
+                autoAlpha: 1,
+                y: 0,
+                stagger: 0.025,
+                duration: 0.7,
+                ease: 'power3.out',
+              });
+            },
+          });
+        }
+      } else {
+        ScrollTrigger.create({
+          trigger: '.featured-header',
+          start: 'top 90%',
+          once: true,
+          onEnter: () => {
+            gsap.to('.featured-header', { autoAlpha: 1, y: 0, duration: 0.5, ease: 'power2.out' });
+          },
+        });
+      }
+
+      ScrollTrigger.batch('.post-card-wrapper', {
+        start: 'top 90%',
+        once: true,
+        onEnter: (batch) =>
+          gsap.to(batch, {
+            autoAlpha: 1,
+            y: 0,
+            scale: 1,
+            stagger: { each: 0.1, from: 'start' },
+            duration: 0.8,
+            ease: 'power3.out',
+            overwrite: true,
+          }),
+      });
+
+      ScrollTrigger.create({
+        trigger: '.featured-footer',
+        start: 'top 90%',
+        once: true,
+        onEnter: () => {
+          gsap.to('.featured-footer', { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power3.out' });
+        },
+      });
+
+      if (isDesktop) {
+        tilt3D('.post-card', { intensity: 6 });
+      }
+    });
+  }
+
+  function bootOnce() {
+    initFeaturedAnimations();
+  }
+
+  document.addEventListener('DOMContentLoaded', bootOnce);
+  document.addEventListener('astro:page-load', bootOnce);
+</script>

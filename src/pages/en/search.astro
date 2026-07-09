@@ -1,0 +1,16 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import SearchBoard from '@components/search/SearchBoard.astro';
+import { useTranslations, type Lang } from '@utils/i18n';
+
+const lang: Lang = 'en';
+const t = useTranslations(lang);
+---
+
+<BaseLayout
+  title={t('search.pageMetaTitle')}
+  description={t('search.pageMetaDescription')}
+  lang={lang}
+>
+  <SearchBoard lang={lang} />
+</BaseLayout>
