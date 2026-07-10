@@ -16,16 +16,27 @@ npx tsc --noEmit --skipLibCheck  # Type check
 ### i18n Routing
 - Routes are prefixed: `/es/*` and `/en/*`
 - Root `/` redirects to `/es` (default locale)
-- `getStaticPosts(lang)` filters by `id.startsWith(lang + '/')` AND `data.language === lang`
+- `getPostsByLang(lang)` filters by `id.startsWith(lang + '/')` AND `data.language === lang`
 - **Never** mix posts between language folders
 
 ### View Transitions
 - Enabled via `<ViewTransitions />` in `BaseLayout.astro`
 - GSAP scripts MUST use `astro:page-load` event (NOT just `DOMContentLoaded`)
-- Always kill previous tweens before re-creating:
+- Always scope per-page animations with a `gsap.context()` and call `ctx.revert()` on `astro:page-load` to avoid leaks across View Transitions:
+  ```javascript
+  let ctx: gsap.Context | null = null;
+  function initHeroAnimations() {
+    ctx?.revert();
+    ctx = gsap.context(() => {
+      // ...addEventListener / gsap.from / gsap.to calls here
+    });
+  }
+  document.addEventListener('astro:page-load', initHeroAnimations);
+  ```
+- For a full nuke (e.g. theme toggle or route changes), `killAllAnimations()` from `src/utils/animations.ts` does:
   ```javascript
   ScrollTrigger.getAll().forEach(st => st.kill());
-  gsap.killTweensOf('.selector');
+  gsap.globalTimeline.getChildren(true, true, true).forEach(t => t.kill());
   ```
 
 ### Theme Toggle (Dark/Light)
