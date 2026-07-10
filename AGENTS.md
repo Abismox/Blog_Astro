@@ -8,6 +8,7 @@ Astro 4.x personal blog with Tailwind CSS, GSAP animations, i18n (ES/EN), and Gi
 npm run dev      # Start dev server
 npm run build    # Production build (dist/)
 npm run preview  # Preview production build
+npm run new-post "Título"  # Crear nuevo post MDX con frontmatter válido
 npx tsc --noEmit --skipLibCheck  # Type check
 ```
 
@@ -49,6 +50,30 @@ npx tsc --noEmit --skipLibCheck  # Type check
 - `posts` collection: requires `language` field (`'es'` or `'en'`)
 - Posts go in `src/content/posts/{es,en}/filename.mdx`
 - Frontmatter must include `language` to pass schema validation
+- **Valid `category` values:** `tech`, `gaming`, `devlog` (anything else fails schema)
+- **Valid `language` values:** `es`, `en` (the script also enforces this)
+
+### Creating a New Post (Daily Workflow)
+
+Use the helper script — don't write the frontmatter by hand:
+
+```bash
+npm run new-post "Título del post"                       # ES, tech (default)
+npm run new-post -- --lang en "Title"                    # English post
+npm run new-post -- --category gaming "Reseña X"         # Gaming category
+npm run new-post -- --lang en --category devlog "Title"  # Combined
+npm run new-post -- --dry-run "Título"                   # Preview without creating
+```
+
+The script (`scripts/new-post.mjs`) handles slug generation, today's date, valid frontmatter, and refuses to overwrite existing files.
+
+**Full daily flow:**
+```bash
+npm run new-post "Título"        # 1. create file
+# edit the .mdx — fill description, tags, body
+npm run dev                       # 2. preview at localhost:4321
+git add . && git commit -m "post: slug" && git push   # 3. publish (auto-deploy ~1-2 min)
+```
 
 ### Arcade/Games
 - Game HTML files go in `public/games/*.html`
@@ -62,6 +87,20 @@ npx tsc --noEmit --skipLibCheck  # Type check
 2. **SearchBoard keyboard listener**: Uses `window.__searchKeyHandler` to prevent accumulation
 3. **Navbar script**: Wrapped in `if (!window.__navbarInit)` to prevent duplicate listeners
 4. **@apply in nested CSS**: Tailwind `@apply` doesn't work in nested selectors under `html.light {}` — use plain CSS properties instead
+5. **YAML frontmatter indentation**: Frontmatter keys MUST start at column 0. If any line is indented, YAML treats it as a continuation of the previous value, and the parser silently drops the "indented" keys → Astro reports them as `Required`. Symptom: `InvalidContentEntryFrontmatterError` with several fields missing even though they look present.
+   ```yaml
+   # ❌ WRONG — these 2-space indents break parsing
+   title: "Foo"
+     description: "Bar"
+     pubDate: 2026-07-10
+     ---
+
+   # ✅ CORRECT — every key and the closing `---` at column 0
+   title: "Foo"
+   description: "Bar"
+   pubDate: 2026-07-10
+   ---
+   ```
 
 ## File Structure
 ```
